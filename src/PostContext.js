@@ -9,6 +9,7 @@ function createRandomPost() {
 }
 // create context
 const PostContext = createContext();
+
 const SearchContext = createContext();
 
 function PostProvider({ children }) {
