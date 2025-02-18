@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { faker } from "@faker-js/faker";
 import { PostProvider, usePost } from "./PostContext";
 import Test from "./Test";
@@ -30,6 +30,7 @@ function App() {
         {isFakeDark ? "☀️" : "🌙"}
       </button>
       <PostProvider>
+        Sear
         <Header />
         <Main />
         <Archive />
@@ -40,7 +41,7 @@ function App() {
 }
 
 function Header() {
-  const { onClearPosts } = usePost()[0];
+  const { onClearPosts } = usePost();
   return (
     <header>
       <h1>
@@ -56,7 +57,7 @@ function Header() {
 }
 
 function SearchPosts() {
-  const { searchQuery, setSearchQuery } = usePost()[1];
+  const { searchQuery, setSearchQuery } = usePost();
   return (
     <input
       value={searchQuery}
@@ -77,7 +78,7 @@ function Main() {
 }
 
 function FormAddPost() {
-  const { onAddPost } = usePost()[0];
+  const { onAddPost } = usePost();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
 
@@ -107,17 +108,18 @@ function FormAddPost() {
 }
 
 function List() {
-  const { posts } = usePost()[0];
-  return (<>
-    <ul>
-      {posts.map((post, i) => (
-        <li key={post.body}>
-          <h3>{post.title}</h3>
-          <p>{post.body}</p>
-        </li>
-      ))}
-    </ul>
-    <Test />
+  const { posts } = usePost();
+  return (
+    <>
+      <ul>
+        {posts.map((post, i) => (
+          <li key={post.body}>
+            <h3>{post.title}</h3>
+            <p>{post.body}</p>
+          </li>
+        ))}
+      </ul>
+      <Test />
     </>
   );
 }
@@ -131,10 +133,10 @@ function Posts() {
 }
 
 function Results() {
-  const { posts } = usePost()[0];
+  const { posts } = usePost();
   return <h4>🚀 {posts.length} atomic posts </h4>;
 }
-function Archive() {
+const Archive = memo(function Archive() {
   // Here we don't need the setter function. We're only using state to store these posts because the callback function passed into useState (which generates the posts) is only called once, on the initial render. So we use this trick as an optimization technique, because if we just used a regular variable, these posts would be re-created on every render. We could also move the posts outside the components, but I wanted to show you this trick 😉
   const [posts] = useState(() =>
     // 💥 WARNING: This might make your computer slow! Try a smaller `length` first
@@ -142,7 +144,7 @@ function Archive() {
   );
 
   const [showArchive, setShowArchive] = useState(false);
-  const { onAddPost } = usePost()[0];
+  const { onAddPost } = usePost();
   return (
     <aside>
       <h2>Post archive</h2>
@@ -164,10 +166,11 @@ function Archive() {
       )}
     </aside>
   );
-}
-
+});
 function Footer() {
-  return <footer style={{textAlign:'center'}}>&copy; by Hassan Said ✌️</footer>;
+  return (
+    <footer style={{ textAlign: "center" }}>&copy; by Hassan Said ✌️</footer>
+  );
 }
 
 export default App;

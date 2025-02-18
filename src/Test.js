@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 
-function SlowComponent() {
+const SlowComponent = memo(function SlowComponent() {
   // If this is too slow on your machine, reduce the `length`
   const words = Array.from({ length: 100_000 }, () => "WORD");
   return (
@@ -13,7 +13,7 @@ function SlowComponent() {
     </ul>
   );
 }
-
+)
 export default function Test() {
   
   return (

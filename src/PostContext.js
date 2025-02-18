@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useMemo, useState } from "react";
 import { faker } from "@faker-js/faker";
 
 function createRandomPost() {
@@ -19,34 +19,37 @@ function PostProvider({ children }) {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Derived state. These are the posts that will actually be displayed
-  const searchedPosts =
-    searchQuery.length > 0
+  const searchedPosts = useMemo(() =>searchQuery.length > 0
       ? posts.filter((post) =>
           `${post.title} ${post.body}`
             .toLowerCase()
             .includes(searchQuery.toLowerCase())
         )
-      : posts;
+      : posts, [posts ,searchQuery])
+    
 
-  function handleAddPost(post) {
+   const handleAddPost = useCallback(function handleAddPost(post) {
     setPosts((posts) => [post, ...posts]);
   }
+,[])
 
   function handleClearPosts() {
     setPosts([]);
   }
+          const postValue = useMemo(() =>({
+            posts: searchedPosts,
+            onAddPost: handleAddPost,
+            onClearPosts: handleClearPosts, 
+          } ), [handleAddPost , searchedPosts])
 
+          const searchValue = useMemo(() => ({searchQuery, setSearchQuery }), [searchQuery])
   return (
     <>
       {/* provide value to child components */}
       <PostContext.Provider
-        value={{
-          posts: searchedPosts,
-          onAddPost: handleAddPost,
-          onClearPosts: handleClearPosts,
-        }}
+        value={postValue}
       >
-        <SearchContext.Provider value={{ searchQuery, setSearchQuery }}>
+        <SearchContext.Provider value={searchValue}>
           {children}
         </SearchContext.Provider>
       </PostContext.Provider>
@@ -55,11 +58,14 @@ function PostProvider({ children }) {
 }
 
 function usePost() {
-  const context = [useContext(PostContext), useContext(SearchContext)];
+  const postContext = useContext(PostContext);
+  const searchContext = useContext(SearchContext);
 
-  if (context[0] === undefined)
+  if (!postContext)
     throw new Error("post context was used outside the post provider");
-  return context;
+
+  return { ...postContext, ...searchContext }; // ✅ More readable
 }
+
 
 export { PostProvider, usePost };
